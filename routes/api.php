@@ -51,7 +51,7 @@ Route::middleware('auth:api')->group(function () {
         // Memperbaiki typo pendaftaran dari apiResource manual sebelumnya
         Route::get('/categories', [CategoryController::class, 'index']);
         Route::post('/categories', [CategoryController::class, 'store']);
-        Route::put('/books/{book}/categories/{category}', [CategoryController::class, 'attachCategory']);
+        Route::put('/books/{book}/category/{category}', [CategoryController::class, 'attachCategory']);
     });
 
 
