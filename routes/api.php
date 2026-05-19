@@ -28,6 +28,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/users', [AuthController::class, 'getUsers']);
     Route::get('/users/{id}', [AuthController::class, 'getUserById']);
     
+    // MENYEMPURNAKAN 405: Menambahkan akses baca detail profil secara bersama
+    Route::get('/profiles/{id}', [ProfileController::class, 'show']);
+    
     Route::get('/books', [BookController::class, 'index']);
     Route::get('/books/{id}', [BookController::class, 'show']);
     Route::get('/categories', [CategoryController::class, 'index']);
@@ -45,6 +48,8 @@ Route::middleware('auth:api')->group(function () {
         Route::put('/books/{id}', [BookController::class, 'update']);
         Route::delete('/books/{id}', [BookController::class, 'destroy']);
         
+        // Memperbaiki typo pendaftaran dari apiResource manual sebelumnya
+        Route::get('/categories', [CategoryController::class, 'index']);
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/books/{book}/categories/{category}', [CategoryController::class, 'attachCategory']);
     });
@@ -56,7 +61,7 @@ Route::middleware('auth:api')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware('is_user')->group(function () {
-        // Profil Mandiri
+        // Profil Mandiri (Hanya user bersangkutan yang bisa create/update)
         Route::post('/profiles', [ProfileController::class, 'store']);
         Route::put('/profiles/{id}', [ProfileController::class, 'update']);
         
