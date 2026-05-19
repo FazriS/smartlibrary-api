@@ -16,7 +16,6 @@ class EnsureIsUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // 1. Validasi Token: Pastikan user terautentikasi melalui Guard API (JWT)
         if (!auth()->guard('api')->check()) {
             return response()->json([
                 'success' => false,
@@ -24,12 +23,10 @@ class EnsureIsUser
             ], 401);
         }
 
-        // 2. Validasi Otoritas: Pastikan pengguna memiliki peran sebagai pengguna umum
         if (auth()->guard('api')->user()->role === 'user') {
             return $next($request);
         }
 
-        // 3. Penolakan Akses jika role tidak sesuai
         return response()->json([
             'success' => false,
             'message' => 'Forbidden: Akses ditolak. Halaman ini hanya untuk Pengguna Umum.'
