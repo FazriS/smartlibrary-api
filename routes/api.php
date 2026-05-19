@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
@@ -10,88 +9,63 @@ use App\Http\Controllers\ReadingListController;
 
 /*
 |--------------------------------------------------------------------------
-| Authentication (Public Routes)
+| 1. Public Routes (Tanpa Login)
 |--------------------------------------------------------------------------
 */
-
-Route::post('/register', [AuthController::class, 'register'])
-    ->middleware('throttle:5,1');
-
-Route::post('/login', [AuthController::class, 'login'])
-    ->middleware('throttle:5,1');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 /*
 |--------------------------------------------------------------------------
-| Protected Routes (JWT Auth)
+| 2. Protected Routes (Harus Login JWT)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('auth:api')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Auth & User
-    |--------------------------------------------------------------------------
-    */
-
+    // --- Akses Bersama (Admin & User Bisa Melakukannya) ---
     Route::get('/me', [AuthController::class, 'me']);
-
     Route::post('/logout', [AuthController::class, 'logout']);
-
     Route::get('/users', [AuthController::class, 'getUsers']);
-
     Route::get('/users/{id}', [AuthController::class, 'getUserById']);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Profile Routes
-    |--------------------------------------------------------------------------
-    */
-
-    Route::apiResource('profiles', ProfileController::class);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Book Routes
-    |--------------------------------------------------------------------------
-    */
-
-    Route::apiResource('books', BookController::class);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Admin Only Book Actions
-    |--------------------------------------------------------------------------
-    */
-
-    Route::middleware('role:admin')->group(function () {
-        Route::delete('/books/{id}', [BookController::class, 'destroy']);
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Category Routes
-    |--------------------------------------------------------------------------
-    */
-
-    Route::apiResource('categories', CategoryController::class);
-
-    /*
-    |--------------------------------------------------------------------------
-    | Book Category Relations
-    |--------------------------------------------------------------------------
-    */
-
-    Route::put('/books/{book}/categories/{category}', [CategoryController::class, 'attachCategory']);
     
+    Route::get('/books', [BookController::class, 'index']);
+    Route::get('/books/{id}', [BookController::class, 'show']);
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);
     Route::get('/books/{book}/categories', [CategoryController::class, 'getBookCategories']);
 
+
     /*
     |--------------------------------------------------------------------------
-    | Reading List Routes
+    | Otoritas KHUSUS ADMIN
     |--------------------------------------------------------------------------
     */
+    Route::middleware('is_admin')->group(function () {
+        Route::post('/books', [BookController::class, 'store']);
+        Route::put('/books/{id}', [BookController::class, 'update']);
+        Route::delete('/books/{id}', [BookController::class, 'destroy']);
+        
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::put('/books/{book}/categories/{category}', [CategoryController::class, 'attachCategory']);
+    });
 
-    Route::apiResource('reading-lists', ReadingListController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Otoritas KHUSUS USER
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('is_user')->group(function () {
+        // Profil Mandiri
+        Route::post('/profiles', [ProfileController::class, 'store']);
+        Route::put('/profiles/{id}', [ProfileController::class, 'update']);
+        
+        // Reading List CRUD
+        Route::get('/reading-lists', [ReadingListController::class, 'index']);
+        Route::post('/reading-lists', [ReadingListController::class, 'store']);
+        Route::get('/reading-lists/{id}', [ReadingListController::class, 'show']);
+        Route::put('/reading-lists/{id}', [ReadingListController::class, 'update']);
+        Route::delete('/reading-lists/{id}', [ReadingListController::class, 'destroy']);
+    });
 
 });

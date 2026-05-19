@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\CheckRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,11 +15,10 @@ return Application::configure(
     )
 
     ->withMiddleware(function (Middleware $middleware): void {
-
         $middleware->alias([
-            'role' => CheckRole::class,
+            'is_admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+            'is_user' => \App\Http\Middleware\EnsureIsUser::class,
         ]);
-
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
